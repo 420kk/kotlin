@@ -8,6 +8,7 @@ package org.jetbrains.kotlin.gradle.plugin.mpp
 import org.gradle.api.Project
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.Usage.*
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtensionOrNull
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.androidJvm
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType.jvm
@@ -169,7 +170,7 @@ object KotlinUsages {
             strategy.compatibilityRules.add(KotlinCinteropCompatibility::class.java)
             strategy.disambiguationRules.add(KotlinCinteropDisambiguation::class.java)
 
-            if (project.isKotlinGranularMetadataEnabled) {
+            if (project.kotlinExtensionOrNull != null && project.isKotlinGranularMetadataEnabled) {
                 strategy.compatibilityRules.add(KotlinMetadataCompatibility::class.java)
                 strategy.disambiguationRules.add(KotlinMetadataDisambiguation::class.java)
             }
