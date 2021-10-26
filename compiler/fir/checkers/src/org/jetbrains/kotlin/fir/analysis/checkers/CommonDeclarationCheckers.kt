@@ -118,6 +118,7 @@ object CommonDeclarationCheckers : DeclarationCheckers() {
             FirTopLevelFunctionsChecker,
             FirTopLevelPropertiesChecker,
             FirImportsChecker,
+            FirUnresolvedImportChecker,
         )
 
     override val controlFlowAnalyserCheckers: Set<FirControlFlowChecker>

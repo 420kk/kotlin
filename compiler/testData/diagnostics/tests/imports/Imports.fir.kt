@@ -7,15 +7,15 @@ import b.ext      //extension function
 import b.value    //property
 import b.C.Companion.bar    //function from companion object
 import b.C.Companion.cValue //property from companion object
-import b.constant.fff     //function from val
-import b.constant.dValue  //property from val
+import b.<!UNRESOLVED_REFERENCE!>constant<!>.fff     //function from val
+import b.<!UNRESOLVED_REFERENCE!>constant<!>.dValue  //property from val
 import b.constant
 import b.E.Companion.f      //val from companion object
 import smth.illegal
-import b.C.smth.illegal
-import b.bar.smth
-import b.bar.*
-import b.unr.unr.unr
+import b.C.<!UNRESOLVED_REFERENCE!>smth<!>.illegal
+import b.<!UNRESOLVED_REFERENCE!>bar<!>.smth
+import b.<!UNRESOLVED_REFERENCE!>bar<!>.*
+import b.<!UNRESOLVED_REFERENCE!>unr<!>.unr.unr
 import unr.unr.unr
 
 fun test(arg: B) {
