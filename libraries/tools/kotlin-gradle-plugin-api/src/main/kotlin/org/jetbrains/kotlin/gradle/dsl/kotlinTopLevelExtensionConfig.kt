@@ -25,7 +25,7 @@ interface ExperimentalExtensionConfig {
 enum class ExplicitApiMode(private val cliOption: String) {
     Strict("strict"),
     Warning("warning"),
-    Disabled("disabled");
+    Disabled("disable");
 
     fun toCompilerArg() = "-Xexplicit-api=$cliOption"
 }

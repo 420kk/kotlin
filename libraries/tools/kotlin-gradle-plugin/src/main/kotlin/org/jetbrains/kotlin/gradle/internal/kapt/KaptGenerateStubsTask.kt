@@ -18,6 +18,9 @@ package org.jetbrains.kotlin.gradle.internal
 
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.workers.WorkerExecutor
@@ -35,6 +38,7 @@ import org.jetbrains.kotlin.gradle.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.FilteringSourceRootsContainer
 import org.jetbrains.kotlin.gradle.tasks.SourceRoots
 import org.jetbrains.kotlin.gradle.utils.isParentOf
+import org.jetbrains.kotlin.gradle.utils.property
 import org.jetbrains.kotlin.incremental.classpathAsList
 import org.jetbrains.kotlin.incremental.destinationAsFile
 import java.io.File
@@ -64,10 +68,11 @@ abstract class KaptGenerateStubsTask @Inject constructor(
 
             val kotlinCompileTask = kotlinCompileTaskProvider.get()
             val providerFactory = kotlinCompileTask.project.providers
+
             task.useModuleDetection.value(kotlinCompileTask.useModuleDetection).disallowChanges()
             task.moduleName.value(kotlinCompileTask.moduleName).disallowChanges()
-            task.classpath = task.project.files(Callable { kotlinCompileTask.classpath })
-            task.pluginClasspath.from(providerFactory.provider { kotlinCompileTask.pluginClasspath })
+
+
 //            task.compileKotlinArgumentsContributor.set(
 //                providerFactory.provider {
 //                    kotlinCompileTask.compilerArgumentsContributor
@@ -84,6 +89,14 @@ abstract class KaptGenerateStubsTask @Inject constructor(
                 }
             )
             task.verbose.set(KaptTask.queryKaptVerboseProperty(task.project))
+        }
+
+        fun configure2(task: KaptGenerateStubsTask, config: KotlinStubsCompileConfiguration) {
+            super.configure(task)
+
+            task.source(config.sources)
+            task.javaSourceRoots.from(config.javaSourceRoots)
+            task.verbose.set(config.verbose)
         }
     }
 

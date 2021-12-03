@@ -141,9 +141,6 @@ abstract class KotlinBaseApiPlugin : KotlinBasePlugin(), KotlinJvmFactory {
     }
 
     override fun createKotlinCompileTask(name: String, taskContainer: TaskContainer): TaskProvider<out KotlinJvmCompileApi> {
-
-        taskProvider.registerKotlinJVMTask(myProject, name, null,)
-
         return taskContainer.register(name, KotlinCompile::class.java, KotlinJvmOptionsImpl())
     }
 

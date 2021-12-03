@@ -201,7 +201,7 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments> : AbstractKotl
             task.project.layout.buildDirectory.dir("$KOTLIN_BUILD_DIR_NAME/classpath-snapshot/${task.name}")
     }
 
-    protected fun applyFrom(topLeveExtension: KotlinTopLevelExtension) {
+    open protected fun applyFrom(topLeveExtension: KotlinTopLevelExtensionConfig) {
         coroutines.value(
             project.provider {
                 topLeveExtension.experimental.coroutines
@@ -209,6 +209,7 @@ abstract class AbstractKotlinCompile<T : CommonCompilerArguments> : AbstractKotl
                     ?: Coroutines.DEFAULT
             }
         ).disallowChanges()
+        // etc, extract all properties we care about
     }
 
     init {
@@ -625,7 +626,6 @@ abstract class KotlinCompile @Inject constructor(
         coroutines.value(project.provider {
             ext.experimental.coroutines ?: propertiesProvider.coroutines ?: Coroutines.DEFAULT
         }).disallowChanges()
-        propertiesProvider.mapKotlinTaskProperties(this)
     }
 
     @get:Internal
@@ -641,16 +641,30 @@ abstract class KotlinCompile @Inject constructor(
      *
      * Example: a Java source file with `package com.example.my.package` is located in directory `src/main/java/my/package`.
      * Then, for the Kotlin compilation to locate the source file, use package prefix `"com.example"` */
-    @get:Input
-    @get:Optional
-    var javaPackagePrefix: String? = null
+    @get:Internal
+    @get:Deprecated("Please use javaPackagePrefixProperty")
+    var javaPackagePrefix: String?
+        get() = javaPackagePrefixProperty.orNull
+        set(value) {
+            value ?: return
+            javaPackagePrefixProperty.set(value)
+        }
 
     @get:Input
-    var usePreciseJavaTracking: Boolean = true
+    @get:Optional
+    abstract val javaPackagePrefixProperty: Property<String>
+
+    @get:Internal
+    @get:Deprecated("Please use usePreciseJavaTrackingProperty")
+    var usePreciseJavaTracking: Boolean
+        get() = usePreciseJavaTrackingProperty.get()
         set(value) {
-            field = value
+            usePreciseJavaTrackingProperty.set(value)
             logger.kotlinDebug { "Set $this.usePreciseJavaTracking=$value" }
         }
+
+    @get:Input
+    abstract val usePreciseJavaTrackingProperty: Property<Boolean>
 
     @Internal // To support compile avoidance (ClasspathSnapshotProperties.classpathSnapshot will be used as input instead)
     override fun getClasspath(): FileCollection {
@@ -949,33 +963,6 @@ abstract class Kotlin2JsCompile @Inject constructor(
 
     init {
         incremental = true
-    }
-
-    open class Configurator<T : Kotlin2JsCompile>(compilation: KotlinCompilationData<*>) :
-        AbstractKotlinCompile.Configurator<T>(compilation) {
-
-        override fun configure(task: T) {
-            super.configure(task)
-
-            task.outputFileProperty.value(
-                task.project.provider {
-                    task.kotlinOptions.outputFile?.let(::File)
-                        ?: task.destinationDirectory.locationOnly.get().asFile.resolve("${compilation.ownModuleName}.js")
-                }
-            ).disallowChanges()
-            task.optionalOutputFile.fileProvider(
-                task.outputFileProperty.flatMap { outputFile ->
-                    task.project.provider {
-                        outputFile.takeUnless { task.kotlinOptions.isProduceUnzippedKlib() }
-                    }
-                }
-            ).disallowChanges()
-            val libraryCacheService = task.project.rootProject.gradle.sharedServices.registerIfAbsent(
-                "${LibraryFilterCachingService::class.java.canonicalName}_${LibraryFilterCachingService::class.java.classLoader.hashCode()}",
-                LibraryFilterCachingService::class.java
-            ) {}
-            task.libraryCache.set(libraryCacheService).also { task.libraryCache.disallowChanges() }
-        }
     }
 
     internal abstract class LibraryFilterCachingService : BuildService<BuildServiceParameters.None>, AutoCloseable {

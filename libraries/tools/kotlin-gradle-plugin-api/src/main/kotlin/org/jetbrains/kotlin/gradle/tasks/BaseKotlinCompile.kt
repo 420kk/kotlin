@@ -18,6 +18,53 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinTopLevelExtensionConfig
 import java.io.File
 
+interface KotlinCompileApiConfiguration : CompileUsingKotlinDaemon {
+    @get:Input
+    val moduleName: Property<String>
+
+    @get:Input
+    val sourceSetName: Property<String>
+
+    @get:Input
+    val useModuleDetection: Property<Boolean>
+
+    @get:Input
+    val multiPlatformEnabled: Property<Boolean>
+
+    @get:Classpath
+    val pluginClasspath: ConfigurableFileCollection
+
+    @get:Internal("Takes part in compiler args.")
+    val friendPaths: ConfigurableFileCollection
+
+
+    @get:LocalState
+    val taskBuildDirectory: DirectoryProperty
+
+    @get:Internal("Already marked as output, this is just a helper property.")
+    val outputDirectory: DirectoryProperty
+
+    val topLevelExtension: KotlinTopLevelExtensionConfig
+}
+
+interface Configurator {
+    fun configure(task: KotlinCompileApi)
+}
+
+interface ConfiguratorInternal: Configurator {
+    fun configure(task: KotlinJvmCompileApi)
+}
+
+interface KotlinCompileApiConfigurationInternal : KotlinCompileApiConfiguration {
+    val friendSourceSets: ListProperty<String>
+
+    val associatedJavaCompileTaskTargetCompatibility: Property<String>
+
+    val associatedJavaCompileTaskSources: ConfigurableFileCollection
+
+    val associatedJavaCompileTaskName: Property<String>
+}
+
 /** Common for all Kotlin compile tasks. */
 interface KotlinCompileApi : CompileUsingKotlinDaemon {
     @get:Input
